@@ -1,0 +1,16 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: dealerflow-gpu-scaler
+  namespace: dealerflow
+spec:
+  scaleTargetRef:
+    name: dealerflow-gpu-worker
+  minReplicaCount: 0
+  maxReplicaCount: 5
+  triggers:
+    - type: azure-queue
+      metadata:
+        queueName: dealerflow-gpu-jobs
+        queueLength: "1" # Scale up if 1 or more messages
+        connectionFromEnv: AZURE_STORAGE_CONNECTION_STRING

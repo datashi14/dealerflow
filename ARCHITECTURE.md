@@ -60,13 +60,7 @@ raw_mac_rass_of`
 -`ba_at`
 raw_cdis_o
  -`hy_ig_sprad_prox`
--`urve_slp_2s10`  `fnding_spd_rxy` (anyohr simp macceditroxieed4Fatue Tes**features_equity (per underlying per day, e.g. SPX)
-  - `as_f`,`udering`
-  - `ne_gamma`
-  -`gamma_belw_ot`, `gamma_bov_spot`gamma_ner_expiry`
-   `nr_trm_gamma_atio`
-  - `gamma_spe  `ut_cal_o_r`
-  -`et_dela`gamm_flp_lv
+-`urve_slp_2s10`  `fnding_spd_rxy` (anyohr simp macceditroxieed4Fatue Tes**features_## 4. Azure GPU Orchestration (Hybrid Architecture)
   -`featue_vcr`(JSONB–fulldump)feat_ommodity(perunying day, GOLD)
   `a_of`, `undlyng`heder_net_oiion-`spec_t_sitin`bcwartin_pct-`rll_yid`-`oi_chng`  vol_temstrucure(l)  fe_vector(JSONB)
 

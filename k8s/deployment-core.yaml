@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dealerflow-core
+  namespace: dealerflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dealerflow-core
+  template:
+    metadata:
+      labels:
+        app: dealerflow-core
+    spec:
+      # Lands on the default system pool (no taints needed)
+      containers:
+        - name: core
+          image: dealerflowacr.azurecr.io/dealerflow-core:latest
+          env:
+            - name: DATABENTO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dealerflow-secrets
+                  key: DATABENTO_API_KEY
+            - name: PG_CONN_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: dealerflow-secrets
+                  key: PG_CONN_STRING
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"

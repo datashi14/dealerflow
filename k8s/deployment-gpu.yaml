@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dealerflow-gpu-worker
+  namespace: dealerflow
+spec:
+  replicas: 0  # Controlled by KEDA (0 when idle)
+  selector:
+    matchLabels:
+      app: dealerflow-gpu-worker
+  template:
+    metadata:
+      labels:
+        app: dealerflow-gpu-worker
+    spec:
+      # Ensure we schedule on the GPU pool
+      nodeSelector:
+        sku: gpu
+      # Tolerate the taint we placed on the GPU nodes
+      tolerations:
+        - key: "sku"
+          operator: "Equal"
+          value: "gpu"
+          effect: "NoSchedule"
+      containers:
+        - name: worker
+          image: dealerflowacr.azurecr.io/dealerflow-gpu:latest
+          env:
+            - name: PG_CONN_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: dealerflow-secrets
+                  key: PG_CONN_STRING
+            - name: JOB_QUEUE_NAME
+              value: dealerflow-gpu-jobs
+          # Request the GPU resource so Kubernetes assigns the device
+          resources:
+            limits:
+              nvidia.com/gpu: 1
