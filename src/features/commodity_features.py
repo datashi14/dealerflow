@@ -21,15 +21,17 @@ def compute_commodity_features(as_of: date, underlying: str = 'GOLD'):
     with get_db_connection() as conn:
         df_fut = pd.read_sql(query_fut, conn, params=(as_of, underlying))
         
-    # 2. Fetch COT Data
+    # 2. Fetch COT (Positioning)
+    # Use latest available report on or before date
     query_cot = """
     SELECT * FROM raw_cot
-    WHERE as_of <= %s AND market = %s
+    WHERE market = %s AND as_of <= %s
     ORDER BY as_of DESC
     LIMIT 1
     """
+    
     with get_db_connection() as conn:
-        df_cot = pd.read_sql(query_cot, conn, params=(as_of, underlying))
+        df_cot = pd.read_sql(query_cot, conn, params=(underlying, as_of))
 
     if df_fut.empty:
         print(f"No futures data found for {underlying} on {as_of}")

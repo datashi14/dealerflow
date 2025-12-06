@@ -6,7 +6,7 @@ services:
     container_name: dealerflow_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password # You can change this, just update .env
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: dealerflow
     ports:
       - "5433:5432"
@@ -14,5 +14,21 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  app:
+    build: .
+    container_name: dealerflow_app
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      # Override DB Host for Docker networking
+      - PG_HOST=postgres
+      - PG_PORT=5432
+    volumes:
+      - .:/app
+    command: tail -f /dev/null # Keep alive for manual execution
+
 volumes:
   postgres_data:
+
