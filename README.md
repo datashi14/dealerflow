@@ -4,7 +4,7 @@
 
 > **Disclaimer**: Personal research project. Not financial advice.
 
-## ☁️ Azure GPU Orchestration (AKS + KEDA)
+## Azure GPU Orchestration (AKS + KEDA)
 
 DealerFlow demonstrates a sophisticated event-driven architecture for heavy macro simulation:
 
@@ -17,7 +17,7 @@ DealerFlow demonstrates a sophisticated event-driven architecture for heavy macr
 
 See `k8s/` folder for Kubernetes manifests.
 
-## 📊 Data Reality Check
+##  Data Reality Check
 
 | Component | Status | Source |
 |-----------|--------|--------|
@@ -25,7 +25,7 @@ See `k8s/` folder for Kubernetes manifests.
 | **SPX Options** | 🟡 **Simulated** | Databento / Mock (Requires OPRA) |
 | **Narrative** | 🔵 **Template** | LLM Engine (Requires OpenAI Key) |
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
 # 1. Ingest Real Futures
@@ -35,13 +35,13 @@ python scripts/ingest_all_databento.py --date 2024-01-05
 python scripts/generate_report.py --date 2024-01-05
 ```
 
-## 💡 What This Demonstrates
+##  What This Demonstrates
 
 * **Cloud-Native Data Pipeline**: End-to-end ingestion from Databento (institutional) to Postgres to Markdown reports.
 * **Domain Knowledge**: Implementation of complex financial metrics like Net Gamma, Charm, and FX Carry.
 * **Infrastructure Design**: Event-driven GPU orchestration on Azure using AKS and KEDA.
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 * **Compute**: Azure Kubernetes Service (AKS), KEDA, Nvidia T4 GPUs.
 * **Data**: Postgres, Databento.
