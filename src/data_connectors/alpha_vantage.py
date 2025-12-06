@@ -76,7 +76,7 @@ class AlphaVantageConnector:
         
         ts_key = "Time Series (Daily)"
         if ts_key not in data:
-            print("No data found in response.")
+            print(f"No data found for {symbol}. Response keys: {list(data.keys())}")
             if "Note" in data: print(f"Note: {data['Note']}")
             return pd.DataFrame()
             
