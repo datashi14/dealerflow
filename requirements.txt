@@ -7,3 +7,5 @@ python-dotenv>=1.0.0
 databento>=0.40.0
 py_vollib_vectorized>=0.1.1
 scipy>=1.10.0
+
+jinja2>=3.0.0
