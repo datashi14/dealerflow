@@ -2,7 +2,7 @@
 
 **DealerFlow** is a quantitative research engine that measures Structural Flowthe mechanical hedging pressure of option dealersto score market fragility. It features a cloud-native **Hybrid CPU/GPU Architecture** on Azure.
 
-> **Disclaimer**: Personal research project.
+> **Disclaimer**: Personal research project. Not financial advice.
 
 ##  Azure GPU Orchestration (AKS + KEDA)
 
@@ -25,14 +25,7 @@ See k8s/ folder for Kubernetes manifests.
 | **SPX Options** |  **Simulated** | Databento / Mock (Requires OPRA) |
 | **Narrative** |  **Template** | LLM Engine (Requires OpenAI Key) |
 
-##  Tech Stack
-
-* **Compute**: Azure Kubernetes Service (AKS), KEDA, Nvidia T4 GPUs.
-* **Data**: Postgres, Databento.
-* **Code**: Python 3.10, PyTorch (GPU Worker), Pandas (Core).
-* **DevOps**: Docker, Kubernetes.
-
-##  Quick Start (Core)
+##  Quick Start
 
 `ash
 # 1. Ingest Real Futures
@@ -41,3 +34,16 @@ python scripts/ingest_all_databento.py --date 2024-01-05
 # 2. Generate Report
 python scripts/generate_report.py --date 2024-01-05
 `
+
+##  What This Demonstrates
+
+* **Cloud-Native Data Pipeline**: End-to-end ingestion from Databento (institutional) to Postgres to Markdown reports.
+* **Domain Knowledge**: Implementation of complex financial metrics like Net Gamma, Charm, and FX Carry.
+* **Infrastructure Design**: Event-driven GPU orchestration on Azure using AKS and KEDA.
+
+##  Tech Stack
+
+* **Compute**: Azure Kubernetes Service (AKS), KEDA, Nvidia T4 GPUs.
+* **Data**: Postgres, Databento.
+* **Code**: Python 3.10, PyTorch (GPU Worker), Pandas (Core).
+* **DevOps**: Docker, Kubernetes.

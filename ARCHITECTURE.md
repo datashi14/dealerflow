@@ -1,117 +1,60 @@
-htct**btch-orentedss-asse rsarh.
+# DealerFlow Architecture
 
-Ech1.gsaarkeataoptions,,,mcprox).
-2.Cstructural (gmma, oitioning,crry,t.).
-3. Cmbesthese eturs int:
-  - An ****(0–100)
-   - A ** label**: `STABLE``FRAGILE`, `EXLOSIVE` 
-   - A **Pd**: `UP``DOWN`, `NEUTRAL` 
-4. Stores scores in  uifie`ast_co` tabe.
-5. Opionally expoesdata small geeras a **weekly macr flw report** ssemidsiged o b:
+DealerFlow is a batch-oriented, cross-asset macro research engine designed to be cloud-native and modular. It separates data ingestion, feature engineering, scoring, and reporting into distinct phases.
 
--**Clud-ative (Azure-f,bt potabl)
-- Modlar** (eparate eso, fatu, ansring tags)
-- **Asset-agnost** (nw asetscbe dded by pluggi into thsme pttern)
--**Reah-orinted** (no execution / trading functionality)zue-Ornd DeplomntAllresliven azureResc Group,forexample:`rg-elerflw`.
-###2.1CoreResouc
--Azure CoaerRegisy (ACR)Stoscimage for allj andservc.  -Example:`dealerflowacr.azurecr.io`
+## 1. High-Level Data Flow
 
-****  - Core datastoe fr raw data, featur, adses.  -Example:`pg-dealerflow`
+`mermaid
+graph TD
+    A[External APIs] -->|Databento/CFTC| B(Ingestion Layer)
+    B --> C[(Postgres DB)]
+    C --> D[Feature Engineering]
+    D -->|Net Gamma, Carry, Term Structure| E[Scoring Engine]
+    E -->|Instability Scores| F[Report Generator]
+    F -->|Context| G[LLM Narrative Engine]
+    G --> H[Final Markdown Report]
+`
 
- **Azurevromnt**Hss:**CtarppsJobs**fschdligeion, feur, andsco jobs. **** for the.
-- **Azure KeyVault**
-Sores scets:
-    - Mrketdaa API ky.
-   -Posgretion sr.
+## 2. Core Components
 
--**SraAccount o
--Forrawdatadumps,backps, and expots.
+### 2.1 Data Layer (Postgres)
+The database schema is normalized into three layers:
+1. **Raw Tables** (aw_futures, aw_options, aw_fx): Direct dumps from APIs.
+2. **Feature Tables** (eatures_equity, eatures_commodity): Computed signals (e.g., Net Gamma, 20d Volatility).
+3. **Scores Table** (sset_scores): Final 0-100 instability scores and regime labels.
 
-### 2.2 Obsrvability
+### 2.2 Compute Layer (Python)
+* **Ingestion**: Standalone scripts (ingest_*.py) that fetch data and handle upserts (idempotent).
+* **Math Engine**: Uses py_vollib_vectorized for efficient Black-Scholes calculations on option chains.
+* **Scoring**: A deterministic rules engine that maps features to regimes (STABLE, FRAGILE, EXPLOSIVE).
 
--**og Analytics**
--entralised logging fr Conainrpps&Jbs.
+## 3. Azure GPU Orchestration (Hybrid Architecture)
 
--**Aplicatin Insights**Requmets adrrors fo hAPIsevc.
+To handle heavy ML workloads (e.g., regime clustering, embeddings) without blocking the core API, the system uses a hybrid AKS architecture.
 
----## 3. Archtecture
+### 3.1 Cluster Topology
+* **Nodepool 1 (System/CPU)**: Runs the Core API and Ingestion jobs.
+* **Nodepool 2 (GPU)**: Standard_NC4as_T4_v3 (Nvidia T4). Tainted (sku=gpu:NoSchedule) to ensure only ML jobs land here.
 
-At  hih level:FX Macroseries[  ]   ▼
-[ Postges r ][  / Credit+Rates ]     ▼
-[ Postgres  ][Job (Istability / Rem/ Directin) ]     ▼
-[  ]Reports/4Data Modl
+### 3.2 Event-Driven Autoscaling (KEDA)
+We minimize costs by keeping the GPU pool at 0 nodes when idle.
 
-###4.1 aw Tablaw data i stdmp,dnmalisdway frucibility-**aw_options**  `as_of`, `ndrlying`(.g. SPX)
-  - `option_ymbl`, `typ`,`stike`, `exiry`unying_ice  `bid`,`sk`, `lt`
-- `pen_inest`
-- `impid_volatlity`
-  - `delta` (nulla– computd if absnt)mma` (nuable)
-w_futu_of`, `unyingGOLD)
-  - ontt_symbl, `expiry`  `settle_pic`
- - `pe_tet`,`lu`
+1. **Trigger**: Core system pushes a job to Azure Storage Queue dealerflow-gpu-jobs.
+2. **Scale Up**: **KEDA** detects queue depth > 0 and scales the dealerflow-gpu-worker deployment.
+3. **Infra Scale**: AKS Cluster Autoscaler provisions the VM.
+4. **Execute**: Worker pulls features from Postgres, runs PyTorch models, and persists results.
 
-- **raw_cos_f  `mak` (.g.GOLD,AUD)hedr_lg,`hedger_shr`spe_lo`, `spc_hor`
-   `mall_long,`smal_shor`
+`mermaid
+graph LR
+    A[Core System] -->|Enqueue| B[Azure Queue]
+    B -->|Trigger| C[KEDA]
+    C -->|Scale| D[GPU Worker]
+    D <-->|Read/Write| E[(Postgres)]
+`
 
-- **aw_fx**
-- `as_of`pre.g. spo_picshr_r_baee.g. AUD shrt rateshort_re_qote.g.  short rateimplied_vl_1m`, `impld_vol_3m` (if avalabl)
-raw_mac_rass_of`
-   `fd_at
--`ba_at`
-raw_cdis_o
- -`hy_ig_sprad_prox`
--`urve_slp_2s10`  `fnding_spd_rxy` (anyohr simp macceditroxieed4Fatue Tes**features_## 4. Azure GPU Orchestration (Hybrid Architecture)
-  -`featue_vcr`(JSONB–fulldump)feat_ommodity(perunying day, GOLD)
-  `a_of`, `undlyng`heder_net_oiion-`spec_t_sitin`bcwartin_pct-`rll_yid`-`oi_chng`  vol_temstrucure(l)  fe_vector(JSONB)
-
--**ea_fx**(pe pair pr day, e.g. AUDUSD)  sf,`pair`
-- `cot_net_`  tedif(RB–Fed)
-  - `cary_tractivnes`
- - `fx__level`  - `fx_vol_slope`- `f_vctor` (JSONB)**crd**
-  - as_of`
--`hy_ig_sprd`
-- `sprd_nd_1`
- - `funing_proxy`
-  - `curv_sop_2s10s`  curv_inversion_dys`
-  - `cdit_riksre` (0–1)
-  - `cre_regime(e.g.EASY, LATE_CYCLE, STRESS_BUILDIN,DELEVERAGING)
-
-- **_rates**
--`as_of`
-  - `fd_ae`
-  - `ba_at`  rdif(RB– Fd)
-  - `re_diff_3m_change`
-  - `liqidity_sco`simple0–1metri from Fed stnce)
-  - `ate_egime`(e.g.TIGHT, EASING, CUTTING, NEUTRALUnified ****
-  - as_of`(0–1)
-  - (0–1)
-  -  (0–1optional)
-  -  (0–1, optional)credit_risk` (0–1, from features_credit)
-  - ` (0–100) – for debugging / extra context
- (Container Apps Jobs)Ech r asmall,statsscontnshedudwith CRON
-ingt-otiaa. rows.
-da..relevnrfesh for Gold.
-..  - On relevant days,refresh`raw_cot`forAUD.
-
-**igest-macro**
-  - Fetch Fed & RBA policy rates(ormanull).
-  - Fetch imple creditproxes (HY/IG pread proxis, cuve slope).
--Iser `raw_macr_rates` andredi.Input:(,y.daaggretdftu.Ouu:.
-Input:,.termstructure,rollyil, nig.
-  - Output:faurescommdy.
--**fx-features**
- Input:r_fx`, `wofo AUD.Cmpute rry, positioni FX fas.Oupu:fx.
-reditInput:cedi. pread&fundingbasedredirisk_score` ad `crdiregme.
- - Output: feurscret.
--**rates-features**
-Input: awmco_r.-Computeratedifrntiatrends, and a simple iquiditycr.Oupu:rates.:
-   - Ltet`faues_equty` (SPX)
-    - Latt`eatues_cmodity`(GOLD)
-    - Latest fx (AUDUSD)  Lat`fatues_credit` and `features_rates`
-   For ech aCompute optional , `R_credit`.Combine into a weght.Deiv refrom thresholds.Compute biaand.Compute .Wie.Alightweight HTTP API n b unasa longlivedAzure :
-**a-rvr**NAll ndpoints re rea-only and implyexpose data from .
-
-
-##7.Nbook&Rping
-()crHistrinlyss.Plting vetme.Iptcrdigme.Arprgcrp**heweklmwrr(see`REOR_DEIGN.md`dtals).
-Saf and Scope Nocdei hrepoconct yrkxchafve trd.llutpue egndahandedcaional sly.Thytm ilbalykptas:  **Bch-oly**oiradymtrucur.  **Rad-ly**frmaarktpspiv(atan, comntyu).
+## 4. Technology Stack
+* **Language**: Python 3.10
+* **Container**: Docker, Azure Container Registry (ACR)
+* **Orchestration**: Kubernetes (AKS), KEDA
+* **Database**: PostgreSQL (Azure Database for PostgreSQL)
+* **Data**: Databento (Institutional Futures/Options), Alpha Vantage (FX/Gold Backup)
